@@ -53,6 +53,7 @@ copy /Y "%PLUGIN%\bsk_run.cmd"       "%DST%\bsk_run.cmd"       || goto :fail
 copy /Y "%PLUGIN%\bsk_client.py"     "%DST%\bsk_client.py"     || goto :fail
 copy /Y "%PLUGIN%\bsk_connect.png"   "%DST%\bsk_connect.png"   || goto :fail
 copy /Y "%PLUGIN%\bsk_submit.png"    "%DST%\bsk_submit.png"    || goto :fail
+copy /Y "%PLUGIN%\bsk_logo.png"      "%DST%\bsk_logo.png"      || goto :fail
 
 echo.
 echo ============================================================

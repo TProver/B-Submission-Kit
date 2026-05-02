@@ -1,6 +1,19 @@
-MIT License
+B Submission Kit is dual-licensed:
 
-Copyright (c) 2026 Thierry Lecomte and contributors
+  * Source code (everything outside docs/, including plugin/, receiver/,
+    install/, tests/, scripts/, and the top-level configuration files):
+    MIT License (full text below).
+
+  * Documentation and accompanying media (everything under docs/, including
+    the user manual, architecture document, screenshots, and generated PDFs):
+    Creative Commons Attribution 4.0 International (CC BY 4.0).
+    Full text: see docs/LICENSE  or  https://creativecommons.org/licenses/by/4.0/
+
+================================================================================
+                                  MIT License
+================================================================================
+
+Copyright (c) 2026 CLEARSY and contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

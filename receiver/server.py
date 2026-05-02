@@ -18,6 +18,7 @@ No database. State lives in-memory; each mutation writes submissions/_state.json
 from __future__ import annotations
 
 import asyncio
+import base64
 import logging
 import logging.handlers
 import re
@@ -235,6 +236,34 @@ def _expected_projects() -> list[str]:
     return sorted(out)
 
 
+def _logo_data_url() -> str:
+    """Return the project logo as a base64 data URL, or '' if not found."""
+    logo_path = Path(__file__).parent.parent / "plugin" / "bsk_logo.png"
+    if not logo_path.is_file():
+        return ""
+    return f"data:image/png;base64,{base64.b64encode(logo_path.read_bytes()).decode('ascii')}"
+
+
+def _load_scenarios_for_project(project_name: str) -> list[tuple[str, list[str]]]:
+    """Return [(scenario_name, [commands])] for a given project, sorted by filename.
+
+    Comments (lines starting with '#') and blank lines are stripped.
+    """
+    scenarios_dir = Path(__file__).parent / "scenarios" / project_name
+    if not scenarios_dir.is_dir():
+        return []
+    out: list[tuple[str, list[str]]] = []
+    for path in sorted(scenarios_dir.glob("*.scenario")):
+        commands: list[str] = []
+        for raw in path.read_text(encoding="utf-8", errors="replace").splitlines():
+            line = raw.strip()
+            if not line or line.startswith("#"):
+                continue
+            commands.append(line)
+        out.append((path.stem, commands))
+    return out
+
+
 @app.get("/api/status")
 async def api_status(request: Request) -> JSONResponse:
     data = state.snapshot()
@@ -337,6 +366,33 @@ def _report_filename(project_names: list[str]) -> str:
     return f"{joined}_{ts}.pdf"
 
 
+def _strip_project_status(text: str) -> str:
+    """Remove every 'Project status' ASCII-table block from text.
+
+    bbatch emits the same table at every stage end, which surfaces in
+    typecheck.log / pog.log / prove.log on top of the copy in summary.log.
+    For per-stage embedding we strip it; summary.log keeps its (final) copy.
+    A block starts at a line equal to 'Project status' and runs as long as
+    the following lines belong to the table (start with '+' or '|').
+    """
+    lines = text.splitlines(keepends=True)
+    out: list[str] = []
+    i = 0
+    while i < len(lines):
+        if lines[i].rstrip() == "Project status":
+            j = i + 1
+            while j < len(lines):
+                stripped = lines[j].lstrip()
+                if not (stripped.startswith("+") or stripped.startswith("|")):
+                    break
+                j += 1
+            i = j
+        else:
+            out.append(lines[i])
+            i += 1
+    return "".join(out)
+
+
 def _read_log(path: Path) -> str:
     if not path.exists():
         return "(no log file)"
@@ -386,6 +442,35 @@ def _build_report_html(snapshot: dict) -> str:
                            f'&nbsp;&nbsp;{esc(s.get("name",""))}: {esc(s.get("verdict",""))}</span>')
         return " ".join(out)
 
+    # Per-project scenario tables: rows are commands, columns are scenarios,
+    # max 5 scenarios per table (split into multiple tables for projects with
+    # more). Empty cells fill where one scenario is shorter than another.
+    SCENARIOS_PER_TABLE = 5
+
+    def render_scenarios_for_project(project: str) -> str:
+        scs = _load_scenarios_for_project(project)
+        if not scs:
+            return ""
+        parts = [f"<h3>{esc(project)}</h3>"]
+        for start in range(0, len(scs), SCENARIOS_PER_TABLE):
+            chunk = scs[start:start + SCENARIOS_PER_TABLE]
+            max_rows = max((len(cmds) for _, cmds in chunk), default=0)
+            head = "".join(f"<th>{esc(name)}</th>" for name, _ in chunk)
+            body = []
+            for i in range(max_rows):
+                cells = "".join(
+                    f"<td>{esc(cmds[i]) if i < len(cmds) else ''}</td>"
+                    for _, cmds in chunk
+                )
+                body.append(f"<tr>{cells}</tr>")
+            parts.append(
+                f"<table class='scenarios'><thead><tr>{head}</tr></thead>"
+                f"<tbody>{''.join(body)}</tbody></table>"
+            )
+        return "".join(parts)
+
+    scenarios_html = "".join(render_scenarios_for_project(p) for p in expected)
+
     # Top-level summary table
     summary_rows = []
     for r in rows:
@@ -424,16 +509,22 @@ def _build_report_html(snapshot: dict) -> str:
         if sub.get("summary"):
             sec.append(f"<p class='mono'>{esc(sub['summary'])}</p>")
 
-        # Embed the bbatch summary log
+        # Embed the bbatch summary log (the full per-stage transcript)
         sec.append("<details open><summary><b>summary.log</b> (full bbatch transcript)</summary>")
         sec.append(f"<pre>{esc(_read_log(verif_dir / 'summary.log'))}</pre></details>")
 
-        # Per-stage logs
-        for stage in ("typecheck", "pog", "prove", "animate", "bbatch"):
+        # Per-stage logs (animate.log is omitted; per-scenario animate_*.log
+        # below is the more informative form). Each per-stage log carries a
+        # copy of the same Project status table that summary.log already
+        # shows; strip it to avoid 4 identical tables per (student, project).
+        for stage in ("typecheck", "pog", "prove", "bbatch"):
             log_path = verif_dir / f"{stage}.log"
             if log_path.exists():
-                sec.append(f"<details><summary><b>{stage}.log</b></summary>")
-                sec.append(f"<pre>{esc(_read_log(log_path))}</pre></details>")
+                content = _strip_project_status(_read_log(log_path)).strip()
+                if not content:
+                    continue
+                sec.append(f"<details open><summary><b>{stage}.log</b></summary>")
+                sec.append(f"<pre>{esc(content)}</pre></details>")
 
         # Per-scenario logs (animate detail)
         scenarios = (sub.get("scenarios") or {}).get("animate") or []
@@ -442,7 +533,7 @@ def _build_report_html(snapshot: dict) -> str:
             log_path = verif_dir / f"animate_{safe}.log"
             verdict = s.get("verdict", "?")
             note = s.get("note") or ""
-            sec.append(f"<details><summary><b>animate / {esc(s['name'])}</b> &mdash; {esc(verdict)} {esc(note and ('('+note+')'))}</summary>")
+            sec.append(f"<details open><summary><b>animate / {esc(s['name'])}</b> &mdash; {esc(verdict)} {esc(note and ('('+note+')'))}</summary>")
             sec.append(f"<pre>{esc(_read_log(log_path))}</pre></details>")
 
         sec.append("</section>")
@@ -457,6 +548,14 @@ def _build_report_html(snapshot: dict) -> str:
       table.summary { border-collapse: collapse; width: 100%; font-size: 12px; margin-top: 12px; }
       table.summary th, table.summary td { border: 1px solid #e0e0e0; padding: 6px 8px; text-align: left; vertical-align: top; }
       table.summary th { background: #f3f5fa; }
+      table.scenarios { border-collapse: collapse; font-size: 11px; margin: 6px 0 16px; }
+      table.scenarios th, table.scenarios td { border: 1px solid #e0e0e0; padding: 4px 8px; text-align: left; vertical-align: top; font-family: ui-monospace, Consolas, monospace; }
+      table.scenarios th { background: #f3f5fa; font-weight: 600; }
+      .report-header { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
+      .report-header .logo { height: 56px; flex-shrink: 0; }
+      .report-header h1 { margin: 0; }
+      .report-header .meta { margin-top: 4px; }
+      section.detail:first-of-type { page-break-before: always; }
       .pill { display: inline-block; font-size: 10px; margin: 1px 3px 1px 0; padding: 1px 6px; border-radius: 8px; background: #eee; color: #444; }
       .pill.ok { background: #dff0dd; color: #1a5a2a; }
       .pill.partial { background: #fdecc8; color: #7a4a10; }
@@ -474,7 +573,6 @@ def _build_report_html(snapshot: dict) -> str:
       .mono { font-family: ui-monospace, Consolas, monospace; font-size: 11px; color: #666; }
       section.detail { page-break-inside: avoid; margin-bottom: 18px; }
       @media print {
-        details { open: true; }
         details > summary { display: none; }
         pre { max-height: none; }
       }
@@ -482,14 +580,19 @@ def _build_report_html(snapshot: dict) -> str:
 
     proj_list = ", ".join(expected) or "(none)"
     n_subs = sum(1 for r in rows if r.get("last_submission"))
+    logo_url = _logo_data_url()
+    logo_img = f'<img src="{logo_url}" class="logo" alt="">' if logo_url else ""
     return f"""<!doctype html>
 <html><head><meta charset="utf-8">
-<title>BSK Verification Report &mdash; {ts}</title>
+<title>B Submission Kit Verification Report &mdash; {ts}</title>
 <style>{css}</style></head><body>
-<h1>BSK Verification Report</h1>
-<div class="meta">
-  Generated {ts} &middot; expected projects: {esc(proj_list)} &middot; submissions: {n_subs}
-</div>
+<header class="report-header">
+  {logo_img}
+  <div>
+    <h1>B Submission Kit Verification Report</h1>
+    <div class="meta">Generated {ts} &middot; expected projects: {esc(proj_list)} &middot; submissions: {n_subs}</div>
+  </div>
+</header>
 
 <h2>Summary</h2>
 <table class="summary">
@@ -497,7 +600,8 @@ def _build_report_html(snapshot: dict) -> str:
 <tbody>{''.join(summary_rows) or '<tr><td colspan=5>(no submissions)</td></tr>'}</tbody>
 </table>
 
-<h2>Detailed verifications</h2>
+{f'<h2>Verification scenarios</h2>{scenarios_html}' if scenarios_html else ''}
+
 {''.join(detail_html) or '<p>(no submission details)</p>'}
 
 </body></html>

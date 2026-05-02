@@ -1,8 +1,12 @@
-# BSK User Manual
+<p align="center"><img src="logos/bsk_classroom.png" alt="B Submission Kit" width="100%"></p>
 
-**Project:** B Submission Kit
-**Repository:** <https://github.com/TProver/B-Submission-Kit>
-**Audience:** students using the plug-in, and teachers running the classroom server.
+# B Submission Kit User Manual
+
+**Project:** B Submission Kit<br>
+**Repository:** <https://github.com/TProver/B-Submission-Kit><br>
+**Audience:** students using the plug-in, and teachers running the classroom server.<br>
+**Provided by:** [CLEARSY](https://www.clearsy.com) (Safety Solutions Designer).<br>
+**Atelier B:** <https://www.atelierb.eu>
 
 ---
 
@@ -29,16 +33,23 @@ The teacher distributes the BSK plug-in folder (or a link to its installer). On 
 
 1. Open File Explorer in the `install/windows/` folder of the BSK distribution.
 2. Right-click `install_plugin.cmd` → **Run as administrator**.
-3. The installer copies six files (two `.etool` descriptors, the Python client, two PNG icons, and a small `.cmd` wrapper) into `C:\Program Files\Atelier B Community Edition 24.04.2 24.04.2\share\plugins\`.
+3. The installer copies six files (two `.etool` descriptors, the Python client, two PNG icons, and a small `.cmd` wrapper) into the Atelier B `share\plugins\` folder. By default the installer assumes Atelier B Community Edition 24.04.2 at `C:\Program Files\Atelier B Community Edition 24.04.2 24.04.2\`. **If your Atelier B version or install path differs** (for example Pro 25.02, or a non-default location), set the `ATB_ROOT` environment variable before running the installer:
+
+   ```cmd
+   set ATB_ROOT=C:\Program Files\Atelier B Professional Edition 25.02 25.02
+   install_plugin.cmd
+   ```
+
+   The installer aborts with a clear error if the path does not contain a `share\` folder.
 4. Close and reopen Atelier B. You should see a new **Project → BSK Submission** submenu with two entries: **Connect** and **Submit and verify**.
 
-On Linux: run `install/linux/install_plugin.sh` with `sudo` (it does the equivalent copy into the Atelier B `share/plugins/` folder).
+On Linux: run `install/linux/install_plugin.sh` with `sudo` (it does the equivalent copy into the Atelier B `share/plugins/` folder). The Linux installer auto-discovers `/opt/atelierb-*` and `/usr/share/atelierb` candidates; if your install is elsewhere, override with `sudo ATB_ROOT=/path/to/atelierb bash install_plugin.sh`.
 
 You only need to do this once per machine.
 
 ### 2.2 Connect for the first time
 
-![Atelier B Project menu with BSK Submission submenu](screenshots/atelier_b_menu.png)
+<img src="screenshots/atelier_b_menu.png" alt="Atelier B Project menu with BSK Submission submenu" width="50%">
 
 1. Open any B project in Atelier B (the menu items are inactive until a project is open).
 2. **Project → BSK Submission → Connect** (shortcut `Ctrl+Alt+C`).
@@ -46,11 +57,11 @@ You only need to do this once per machine.
    - **Student name** (letters, digits, `_`, `-`; this is what appears on the dashboard).
    - **Server URL** (the teacher tells you the address, e.g. `http://192.168.1.42:8000`).
 
-   ![Connect dialog](screenshots/connect_dialog.png)
+   <img src="screenshots/connect_dialog.png" alt="Connect dialog" width="50%">
 
 4. Click **OK**. A confirmation popup appears with the dashboard URL, open it in your browser to see your row.
 
-   ![Submit confirmation popup](screenshots/submit_popup.png)
+   <img src="screenshots/connect_popup.png" alt="Connect confirmation popup" width="50%">
 
 Behind the scenes, the server **claims your name for this Atelier B installation** and issues a short secret which the plug-in stores at `%APPDATA%\BSKSubmissionKit\config.json`. You will not be asked for it again unless you change machine or wipe that file.
 
@@ -60,6 +71,9 @@ Once connected, every time you want the server to verify your project:
 
 1. **Project → BSK Submission → Submit and verify** (shortcut `Ctrl+Alt+S`).
 2. A small popup confirms the upload size and gives you the dashboard URL.
+
+   <img src="screenshots/submit_popup.png" alt="Submit confirmation popup" width="50%">
+
 3. The server queues the verification. On the dashboard, the row for your project goes through `queued → verifying → ok | partial | fail`.
 
 You can submit as many times as you like during the session; the server keeps only the latest submission per (you, project) pair.
@@ -264,7 +278,7 @@ start_server.cmd --purge [PORT]      # DELETE submissions/ + server_workspace/ (
 
 | Env var | Default | Purpose |
 |---|---|---|
-| `BSK_BBATCH` | `C:\Program Files\Atelier B Community Edition 24.04.2 24.04.2\bin\bbatch.exe` | Atelier B `bbatch` binary |
+| `BSK_BBATCH` | `C:\Program Files\Atelier B Community Edition 24.04.2 24.04.2\bin\bbatch.exe` | Atelier B `bbatch` binary. **Override** when running a different version (e.g. Pro 25.02 or Linux): `set BSK_BBATCH=<path>` before launching `start_server.cmd`. |
 | `BSK_PROBCLI` | `C:\Tools\ProB\probcli.exe` | ProB CLI binary |
 | `BSK_EDGE` | `C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe` | Headless Edge for PDF report rendering |
 | `BSK_PYTHON` | discovered via PATH | Python 3 interpreter for the plug-in client (student side) |

@@ -64,3 +64,7 @@ CLAUDE.md
 *.pyz
 dist/
 build/
+
+# Local PDF build script (depends on Playwright + Pillow, not on the
+# server's stdlib-only requirements). The PDFs it produces are committed.
+docs/_build_pdf.py

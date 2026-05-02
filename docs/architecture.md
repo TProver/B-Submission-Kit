@@ -1,8 +1,12 @@
-# BSK Architecture
+<p align="center"><img src="logos/bsk_classroom.png" alt="B Submission Kit" width="100%"></p>
 
-**Project:** B Submission Kit
-**Repository:** <https://github.com/TProver/B-Submission-Kit>
-**Audience:** maintainers, contributors, anyone considering extending or auditing the tool.
+# B Submission Kit Architecture
+
+**Project:** B Submission Kit<br>
+**Repository:** <https://github.com/TProver/B-Submission-Kit><br>
+**Audience:** maintainers, contributors, anyone considering extending or auditing the tool.<br>
+**Provided by:** [CLEARSY](https://www.clearsy.com) (Safety Solutions Designer).<br>
+**Atelier B:** <https://www.atelierb.eu>
 
 This document describes how BSK is put together, why its pieces are shaped the way they are, and what you can change without rewriting from scratch.
 

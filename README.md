@@ -1,8 +1,12 @@
+<p align="center"><img src="docs/logos/bsk_hero.png" alt="B Submission Kit" width="100%"></p>
+
 # B Submission Kit
 
 A classroom verification toolkit for B-method projects: students submit from inside Atelier B with one click, the teacher watches a live dashboard and prints a PDF report at the end of the session.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+Provided by [CLEARSY](https://www.clearsy.com) (Safety Solutions Designer); built around [Atelier B](https://www.atelierb.eu).
+
+[![Code: MIT](https://img.shields.io/badge/Code-MIT-blue.svg)](LICENSE) [![Docs: CC BY 4.0](https://img.shields.io/badge/Docs-CC%20BY%204.0-lightgrey.svg)](docs/LICENSE)
 
 ![Dashboard overview](docs/screenshots/dashboard_overview.png)
 
@@ -119,4 +123,9 @@ Issues and pull requests welcome at <https://github.com/TProver/B-Submission-Kit
 
 ## License
 
-MIT, see [LICENSE](LICENSE). The bundled `share/plugins/Plugin_Development_Manual.pdf` and Atelier B documentation excerpts under `docs/` are reproduced under their original (CC-BY) terms; see those files for details.
+Dual-licensed:
+
+- **Source code** (everything outside `docs/`): MIT, see [LICENSE](LICENSE).
+- **Documentation, screenshots and generated PDFs** (everything under `docs/`): Creative Commons Attribution 4.0 International (CC BY 4.0), see [docs/LICENSE](docs/LICENSE) or <https://creativecommons.org/licenses/by/4.0/>.
+
+The bundled `share/plugins/Plugin_Development_Manual.pdf` and Atelier B documentation excerpts under `docs/` are reproduced under their original (CC BY) terms; see those files for details.

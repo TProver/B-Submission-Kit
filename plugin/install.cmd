@@ -31,6 +31,7 @@ copy /Y "%SRC%bsk_run.cmd"       "%DST%\bsk_run.cmd"       || goto :fail
 copy /Y "%SRC%bsk_client.py"     "%DST%\bsk_client.py"     || goto :fail
 copy /Y "%SRC%bsk_connect.png"   "%DST%\bsk_connect.png"   || goto :fail
 copy /Y "%SRC%bsk_submit.png"    "%DST%\bsk_submit.png"    || goto :fail
+copy /Y "%SRC%bsk_logo.png"      "%DST%\bsk_logo.png"      || goto :fail
 
 echo.
 echo Install complete. Next steps:

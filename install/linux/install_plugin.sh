@@ -60,6 +60,7 @@ install -m 0755 "$PLUGIN/bsk_run.sh"              "$DST/bsk_run.sh"
 install -m 0644 "$PLUGIN/bsk_client.py"           "$DST/bsk_client.py"
 install -m 0644 "$PLUGIN/bsk_connect.png"         "$DST/bsk_connect.png"
 install -m 0644 "$PLUGIN/bsk_submit.png"          "$DST/bsk_submit.png"
+install -m 0644 "$PLUGIN/bsk_logo.png"            "$DST/bsk_logo.png"
 
 cat <<EOF
 
