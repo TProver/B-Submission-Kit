@@ -1,0 +1,10 @@
+<externalTool name="BSKHello"
+              category="project"
+              label="BSK Hello"
+              shortcut="Ctrl+Alt+H"
+              tooltip="D06-BSubmissionKit: append a line to c:\tmp\bsk-hello.log to verify the plug-in mechanism"
+              icon="bsk_hello.png">
+    <command>"${extensionsDir}\bsk_hello.cmd"</command>
+    <param>${projectName}</param>
+    <param>${projectBdp}</param>
+</externalTool>

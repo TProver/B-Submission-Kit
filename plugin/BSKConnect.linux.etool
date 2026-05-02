@@ -1,0 +1,12 @@
+<externalTool name="BSKConnect"
+              category="project"
+              label="Connect"
+              menu="BSK Submission"
+              shortcut="Ctrl+Alt+C"
+              tooltip="Connect this workstation to the classroom submission server"
+              icon="bsk_connect.png">
+    <command>${extensionsDir}/bsk_run.sh</command>
+    <param>connect</param>
+    <param>${projectName}</param>
+    <param>${projectBdp}</param>
+</externalTool>

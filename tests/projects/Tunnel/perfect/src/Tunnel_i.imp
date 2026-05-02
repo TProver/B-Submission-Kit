@@ -1,0 +1,27 @@
+/* Tunnel_i: B0 implementation of Tunnel.
+ */
+IMPLEMENTATION
+    Tunnel_i
+REFINES
+    Tunnel
+CONCRETE_VARIABLES
+    cars
+INVARIANT
+    cars : 0 .. 100
+VALUES
+    capacity = 100
+INITIALISATION
+    cars := 0
+OPERATIONS
+
+    car_enter =
+    BEGIN
+        cars := cars + 1
+    END;
+
+    car_exit =
+    BEGIN
+        cars := cars - 1
+    END
+
+END

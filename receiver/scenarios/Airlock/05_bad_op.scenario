@@ -1,0 +1,8 @@
+# 05 - intentionally failing: tries to fire an operation that does not
+# exist in the Airlock implementation. Useful as a control case to confirm
+# the dashboard renders failures correctly. ProB should report
+# "ko at scenario line 3 (this_op_does_not_exist)".
+init
+actualize_airlock_pressure
+this_op_does_not_exist
+enable_doors_opening

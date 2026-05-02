@@ -1,0 +1,31 @@
+/* Tunnel_i: deliberately broken implementation.
+ *
+ * Error injected: references undefined identifier UNKNOWN_VAR. Typecheck
+ * fails, so POG/prove/animate are reported as skipped. Used to verify the
+ * dashboard's "skipped" propagation.
+ */
+IMPLEMENTATION
+    Tunnel_i
+REFINES
+    Tunnel
+CONCRETE_VARIABLES
+    cars
+INVARIANT
+    cars : 0 .. 100
+VALUES
+    capacity = 100
+INITIALISATION
+    cars := 0
+OPERATIONS
+
+    car_enter =
+    BEGIN
+        cars := UNKNOWN_VAR + 1
+    END;
+
+    car_exit =
+    BEGIN
+        cars := cars - 1
+    END
+
+END

@@ -1,0 +1,13 @@
+# 02 - normal use: INIT + 5 successive (actualize; enable) cycles.
+# Same as the original baseline scenario.
+init
+actualize_airlock_pressure
+enable_doors_opening
+actualize_airlock_pressure
+enable_doors_opening
+actualize_airlock_pressure
+enable_doors_opening
+actualize_airlock_pressure
+enable_doors_opening
+actualize_airlock_pressure
+enable_doors_opening

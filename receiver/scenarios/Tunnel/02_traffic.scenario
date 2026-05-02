@@ -1,0 +1,15 @@
+# Tunnel traffic: 5 cars enter then 5 leave, in order.
+# Tunnel has a CONCRETE_CONSTANTS capacity, so trace-replay needs an
+# explicit $setup_constants step before $initialise_machine.
+setup_constants(100)
+init
+car_enter
+car_enter
+car_enter
+car_enter
+car_enter
+car_exit
+car_exit
+car_exit
+car_exit
+car_exit

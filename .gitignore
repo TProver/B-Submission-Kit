@@ -1,0 +1,66 @@
+# ----- runtime artefacts (NEVER commit) ----------------------
+# These contain student work, secrets, and machine-specific data.
+
+# Server runtime state. _state.json carries per-student session secrets.
+submissions/
+
+# bbatch's per-submission scratch projects.
+server_workspace/
+
+# Archives created by start_server.cmd --clean.
+archives/
+
+# Rotating server log; may contain hostnames + student names.
+logs/
+
+# Generated PDF / HTML reports.
+reports/
+
+# Test harness's session-token cache.
+tests/.tokens.json
+
+# Test harness's temporary build directory.
+tests/_tmp_zips/
+
+# B project auto-generated content under test fixtures.
+tests/projects/*/bdp/
+tests/projects/*/lang/
+
+# ProB cache files (machine-specific absolute paths inside).
+*.prob
+*.prob.json
+
+# ----- Python ----------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# venv (each platform recreates its own)
+.venv/
+venv/
+env/
+
+# ----- editor / OS noise ------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ----- internal development notes (not for public repo) ----
+# Project-local task tracking and Claude guidance referenced
+# personal info; keep them out of the public repo.
+tasks/
+CLAUDE.md
+.claude/
+
+# ----- distribution artefacts -------------------------------
+*.pyz
+dist/
+build/

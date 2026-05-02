@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>BSK Submission - Classroom Dashboard</title>
+<style>
+  :root { --g: #2e9e4a; --a: #e0a030; --r: #c44040; --ink: #222; --fade: #888; --hi: #f6f7fb; }
+  body { font-family: system-ui, sans-serif; margin: 0; padding: 20px; color: var(--ink); }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .sub { color: var(--fade); font-size: 12px; margin-bottom: 16px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #eee; vertical-align: top; }
+  th { background: var(--hi); font-weight: 600; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
+  .dot.green  { background: var(--g); }
+  .dot.amber  { background: var(--a); }
+  .dot.red    { background: var(--r); }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; color: #fff; background: #888; }
+  .badge.queued    { background: #888; }
+  .badge.verifying { background: #3a76d6; }
+  .badge.ok        { background: var(--g); }
+  .badge.partial   { background: var(--a); }
+  .badge.fail      { background: var(--r); }
+  .stages a { text-decoration: none; }
+  .stages a:hover span { outline: 2px solid rgba(58, 118, 214, .6); outline-offset: 1px; }
+  .stages span { display: inline-block; font-size: 11px; margin-right: 6px; padding: 1px 6px; border-radius: 8px; background: #eee; color: #444; cursor: pointer; }
+  .stages span.ok      { background: #dff0dd; color: #1a5a2a; }
+  .stages span.partial { background: #fdecc8; color: #7a4a10; }
+  .stages span.fail    { background: #fadede; color: #8a1e1e; }
+  .stages span.skipped { background: #eceff4; color: #556; font-style: italic; }
+  .scenario-row { margin-top: 4px; }
+  .scenario-label { font-size: 11px; color: var(--fade); margin-right: 4px; }
+  .summary-row { margin-top: 6px; }
+  .expected { background: #f4f7fb; padding: 10px 14px; border-radius: 8px; margin-bottom: 14px; font-size: 13px; }
+  .expected b { font-weight: 600; }
+  .expected .chip { display: inline-block; background: #fff; border: 1px solid #d8def0; padding: 2px 10px; border-radius: 12px; margin: 2px 4px 2px 0; font-family: ui-monospace, Consolas, monospace; }
+  .expected .chip .count { color: var(--fade); margin-left: 6px; }
+  .sort-bar { margin: 8px 0 12px; font-size: 13px; }
+  .sort-bar button { background: #fff; border: 1px solid #d8def0; padding: 4px 12px; margin-right: 4px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+  .sort-bar button.active { background: #3a76d6; color: #fff; border-color: #3a76d6; }
+  .sort-bar button:hover:not(.active) { background: #eef2f8; }
+  .stages span.pending { background: #eef2f8; color: #526; }
+  .mono { font-family: ui-monospace, Consolas, monospace; font-size: 12px; color: var(--fade); }
+  .empty { padding: 40px; text-align: center; color: var(--fade); }
+  a { color: #3a76d6; text-decoration: none; } a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<h1>BSK Submission - Classroom Dashboard</h1>
+<div class="sub">
+  Refreshes every 2 seconds. Last update: <span id="ts">-</span>. Students: <span id="count">0</span>.
+</div>
+
+<div id="expected" class="expected" style="display: none;"></div>
+
+<div class="sort-bar">
+  Sort:
+  <button data-sort="time"    id="sort-time">Time (oldest first)</button>
+  <button data-sort="student" id="sort-student">Student</button>
+  <button data-sort="project" id="sort-project">Project</button>
+  <button id="report-btn" style="margin-left: 24px;">Generate PDF report</button>
+  <span id="report-status" class="mono" style="margin-left: 10px;"></span>
+</div>
+
+<table>
+  <thead>
+  <tr>
+    <th style="width: 22%;">Student</th>
+    <th style="width: 14%;">Hostname</th>
+    <th style="width: 18%;">Project</th>
+    <th style="width: 14%;">Last submit</th>
+    <th style="width: 12%;">Overall</th>
+    <th>Stages</th>
+  </tr>
+  </thead>
+  <tbody id="rows"></tbody>
+</table>
+
+<div id="empty" class="empty">No students have connected yet.</div>
+
+<script>
+async function tick() {
+  try {
+    const r = await fetch('/api/status', { cache: 'no-store' });
+    const data = await r.json();
+    render(data);
+  } catch (e) {
+    document.getElementById('ts').textContent = 'unreachable';
+  }
+}
+
+let sortMode = localStorage.getItem('bsk-sort') || 'time';
+
+function setSortMode(m) {
+  sortMode = m;
+  localStorage.setItem('bsk-sort', m);
+  for (const btn of document.querySelectorAll('.sort-bar button')) {
+    btn.classList.toggle('active', btn.dataset.sort === m);
+  }
+  if (lastData) render(lastData);
+}
+
+function sortStudents(students) {
+  const arr = students.slice();
+  if (sortMode === 'student') {
+    arr.sort((a, b) => (a.id || '').localeCompare(b.id || ''));
+  } else if (sortMode === 'project') {
+    arr.sort((a, b) =>
+      (a.project_name || '').localeCompare(b.project_name || '') ||
+      (a.id || '').localeCompare(b.id || ''));
+  } else {
+    // time: oldest activity first
+    const ts = e => (e.last_submission && e.last_submission.timestamp)
+                    || e.connected_at || e.last_activity || '';
+    arr.sort((a, b) => ts(a).localeCompare(ts(b)));
+  }
+  return arr;
+}
+
+function renderExpected(data) {
+  const el = document.getElementById('expected');
+  const projects = data.expected_projects || [];
+  if (projects.length === 0) { el.style.display = 'none'; return; }
+  // Count submissions per project from the students list.
+  const counts = {};
+  for (const s of data.students || []) {
+    const p = s.project_name;
+    if (p) counts[p] = (counts[p] || 0) + 1;
+  }
+  const chips = projects.map(p => {
+    const n = counts[p] || 0;
+    return `<span class="chip">${esc(p)}<span class="count">${n} submission${n === 1 ? '' : 's'}</span></span>`;
+  }).join('');
+  el.innerHTML = `<b>Expected projects:</b> ${chips}`;
+  el.style.display = 'block';
+}
+
+let lastData = null;
+
+function render(data) {
+  lastData = data;
+  document.getElementById('ts').textContent = data.generated_at || '-';
+  document.getElementById('count').textContent = (data.students || []).length;
+  renderExpected(data);
+  const rows = document.getElementById('rows');
+  const empty = document.getElementById('empty');
+  rows.innerHTML = '';
+  if (!data.students || data.students.length === 0) {
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  for (const s of sortStudents(data.students)) {
+    const tr = document.createElement('tr');
+    const sub = s.last_submission || {};
+    const stages = sub.stages || { typecheck: '-', pog: '-', prove: '-' };
+    const status = sub.status || '-';
+    const sidEnc = encodeURIComponent(s.id);
+    const projEnc = encodeURIComponent(s.project_name || '');
+    const scenariosByStage = sub.scenarios || {};
+    const stageHtml = Object.entries(stages).map(([k, v]) => {
+      const cls = v === 'ok' ? 'ok'
+                : v === 'fail' ? 'fail'
+                : v === 'partial' ? 'partial'
+                : v === 'skipped' ? 'skipped'
+                : 'pending';
+      const href = `/api/student/${sidEnc}/log?stage=${encodeURIComponent(k)}&project=${projEnc}`;
+      const scs = scenariosByStage[k];
+      let label = `${k}: ${v}`;
+      if (scs && scs.length > 0) {
+        const okCount = scs.filter(r => r.verdict === 'ok').length;
+        label = `${k}: ${okCount}/${scs.length}`;
+      }
+      return `<a href="${href}" target="_blank" rel="noopener" title="Open ${k} log"><span class="${cls}">${label}</span></a>`;
+    }).join('');
+    const scenarioHtml = Object.entries(scenariosByStage).map(([stageName, scs]) => {
+      if (!scs || scs.length === 0) return '';
+      const chips = scs.map(r => {
+        const cls = r.verdict === 'ok' ? 'ok' : 'fail';
+        const safeName = r.name.replace(/[^A-Za-z0-9_-]/g, '_').slice(0, 64);
+        const href = `/api/student/${sidEnc}/log?stage=${encodeURIComponent(stageName + '_' + safeName)}&project=${projEnc}`;
+        const tooltip = r.note ? `${r.name}: ${r.note}` : `${r.name} ${r.verdict}`;
+        return `<a href="${href}" target="_blank" rel="noopener" title="${esc(tooltip)}"><span class="${cls}">${esc(r.name)}: ${r.verdict}</span></a>`;
+      }).join('');
+      return `<div class="scenario-row"><span class="mono scenario-label">${esc(stageName)}:</span> ${chips}</div>`;
+    }).join('');
+    const summaryHref = `/api/student/${sidEnc}/log?stage=summary&project=${projEnc}`;
+    tr.innerHTML = `
+      <td><span class="dot ${s.liveness || 'red'}"></span>
+          <a href="${summaryHref}" target="_blank" rel="noopener" title="Open full bbatch summary log"><b>${esc(s.id)}</b></a><br>
+          <span class="mono">last seen ${esc(s.last_activity || '-')}</span></td>
+      <td>${esc(s.hostname || '-')}</td>
+      <td>${esc(s.project_name || '-')}</td>
+      <td class="mono">${esc(sub.timestamp || '-')}<br>
+          ${sub.size_bytes ? Number(sub.size_bytes).toLocaleString() + ' B' : ''}</td>
+      <td>${status === '-' ? '-' : `<span class="badge ${status}">${status}</span>`}</td>
+      <td class="stages">${stageHtml}
+          ${scenarioHtml}
+          ${sub.summary ? `<div class="mono summary-row">${esc(sub.summary)}</div>` : ''}</td>
+    `;
+    rows.appendChild(tr);
+  }
+}
+
+function esc(s) { return String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])); }
+
+for (const btn of document.querySelectorAll('.sort-bar button[data-sort]')) {
+  btn.addEventListener('click', () => setSortMode(btn.dataset.sort));
+}
+setSortMode(sortMode);
+
+document.getElementById('report-btn').addEventListener('click', async () => {
+  const status = document.getElementById('report-status');
+  const btn = document.getElementById('report-btn');
+  btn.disabled = true;
+  status.textContent = 'rendering...';
+  try {
+    const r = await fetch('/api/report', { method: 'POST' });
+    const data = await r.json();
+    if (data.ok && data.pdf_url) {
+      status.innerHTML = `ready: <a href="${data.pdf_url}" target="_blank">${data.filename}</a>`;
+      window.open(data.pdf_url, '_blank');
+    } else if (data.html_url) {
+      status.innerHTML = `pdf failed (${data.error||'?'}). HTML: <a href="${data.html_url}" target="_blank">open</a>`;
+    } else {
+      status.textContent = 'failed: ' + (data.error || 'unknown');
+    }
+  } catch (e) {
+    status.textContent = 'error: ' + e;
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+tick();
+setInterval(tick, 2000);
+</script>
+
+</body>
+</html>

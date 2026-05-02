@@ -1,0 +1,5 @@
+# 01 - smoke test: INIT then a single cycle.
+# Should pass on any correct Airlock implementation.
+init
+actualize_airlock_pressure
+enable_doors_opening

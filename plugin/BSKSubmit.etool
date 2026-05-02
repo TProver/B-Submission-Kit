@@ -1,0 +1,12 @@
+<externalTool name="BSKSubmit"
+              category="project"
+              label="Submit and verify"
+              menu="BSK Submission"
+              shortcut="Ctrl+Alt+S"
+              tooltip="Upload the current project to the classroom submission server for verification"
+              icon="bsk_submit.png">
+    <command>"${extensionsDir}\bsk_run.cmd"</command>
+    <param>submit</param>
+    <param>${projectName}</param>
+    <param>${projectBdp}</param>
+</externalTool>

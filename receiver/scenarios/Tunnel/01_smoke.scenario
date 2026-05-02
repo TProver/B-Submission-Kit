@@ -1,0 +1,7 @@
+# Tunnel smoke test: one car in, one car out.
+# Tunnel has a CONCRETE_CONSTANTS capacity, so trace-replay needs an
+# explicit $setup_constants step before $initialise_machine.
+setup_constants(100)
+init
+car_enter
+car_exit

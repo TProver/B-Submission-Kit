@@ -1,0 +1,3 @@
+# 04 - init only: just verify the implementation initialises without firing
+# any operation. Smallest possible smoke test.
+init

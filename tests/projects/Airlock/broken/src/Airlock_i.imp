@@ -1,0 +1,39 @@
+/* airlock_i (deliberately broken for regression test)
+ * Author: simulate_classroom
+ * Creation date: 2026-05-01
+ *
+ * Error injected: references the undefined identifier UNKNOWN_PHASE
+ * in the operation bodies, so typecheck rejects the implementation
+ * before POG/prove/animate can run. Used to verify the dashboard's
+ * "skipped" propagation across stages.
+ */
+
+IMPLEMENTATION Airlock_i
+REFINES Airlock
+SEES Airlock_pressure_bs
+CONCRETE_VARIABLES
+    airlock_pressure,
+    is_indoor_door_openable,
+    is_outdoor_door_openable,
+    cycle
+
+INITIALISATION
+    airlock_pressure := other_pressure;
+    is_indoor_door_openable := FALSE;
+    is_outdoor_door_openable := FALSE;
+    cycle := ACQ
+
+OPERATIONS
+    actualize_airlock_pressure =
+    BEGIN
+        airlock_pressure <-- get_pressure ;
+        cycle := UNKNOWN_PHASE
+    END;
+
+    enable_doors_opening =
+    BEGIN
+        is_indoor_door_openable := FALSE;
+        is_outdoor_door_openable := FALSE;
+        cycle := UNKNOWN_PHASE
+    END
+END
