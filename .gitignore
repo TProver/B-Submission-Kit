@@ -76,3 +76,10 @@ docs/_build_pdf.py
 docs/Manual_Extensions_ng.docx
 docs/Manual_Extensions_ng.md
 docs/plugin_design_notes.md
+
+# Hello-world bootstrap artefacts. Kept locally as a known-good baseline
+# (referenced by CLAUDE.md) but not part of the published kit.
+plugin/BSKHello.etool
+plugin/bsk_hello.cmd
+plugin/bsk_hello.png
+plugin/install_test.cmd
