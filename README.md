@@ -6,7 +6,7 @@ A classroom verification toolkit for B-method projects: students submit from ins
 
 Provided by [CLEARSY](https://www.clearsy.com) (Safety Solutions Designer); built around [Atelier B](https://www.atelierb.eu).
 
-[![Code: MIT](https://img.shields.io/badge/Code-MIT-blue.svg)](LICENSE) [![Docs: CC BY 4.0](https://img.shields.io/badge/Docs-CC%20BY%204.0-lightgrey.svg)](docs/LICENSE)
+[![Code: MIT](https://img.shields.io/badge/Code-MIT-blue.svg)](LICENSE) [![Docs: CC BY 4.0](https://img.shields.io/badge/Docs-CC%20BY%204.0-lightgrey.svg)](docs/LICENSE) [![Platform: Windows | Linux](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux-informational.svg)](install/)
 
 ![Dashboard overview](docs/screenshots/dashboard_overview.png)
 
