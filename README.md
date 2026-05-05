@@ -23,7 +23,7 @@ The whole stack uses no database, no cloud service, no external authentication. 
 ### Teacher (Windows)
 
 ```
-git clone https://github.com/TProver/B-Submission-Kit.git
+git clone https://github.com/CLEARSY/B-Submission-Kit.git
 cd B-Submission-Kit
 install\windows\install_server.cmd          (one time)
 receiver\start_server.cmd                   (each session)
@@ -34,7 +34,7 @@ Then visit `http://<your-LAN-IP>:8000/` for the dashboard.
 ### Teacher (Linux)
 
 ```
-git clone https://github.com/TProver/B-Submission-Kit.git
+git clone https://github.com/CLEARSY/B-Submission-Kit.git
 cd B-Submission-Kit
 bash install/linux/install_server.sh        # one time
 bash receiver/start_server.sh               # each session
@@ -119,7 +119,7 @@ The plug-in client is **stdlib-only**: no `pip install` needed on student machin
 
 ## Contributing
 
-Issues and pull requests welcome at <https://github.com/TProver/B-Submission-Kit>. The codebase is small (≈2000 LOC across server, plug-in, and tests) and favours obviousness over abstraction.
+Issues and pull requests welcome at <https://github.com/CLEARSY/B-Submission-Kit>. The codebase is small (≈2000 LOC across server, plug-in, and tests) and favours obviousness over abstraction.
 
 ## License
 
