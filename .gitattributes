@@ -1,0 +1,23 @@
+# GitHub Linguist overrides.
+#
+# Linguist only registers .mch for B (Formal Method) by default, so
+# refinements (.ref), implementations (.imp), pattern modules (.pmm),
+# and system descriptions (.sys) get misclassified or ignored.
+# These rules force them all to count as B.
+#
+# Language stats only update on the default branch; allow GitHub a few
+# minutes to recompute after pushing.
+
+*.mch linguist-language=B
+*.ref linguist-language=B
+*.imp linguist-language=B
+*.pmm linguist-language=B
+*.sys linguist-language=B
+
+# C produced by atelierb_generate_c is build output, not authored code.
+# These paths are gitignored today; the rules below are defensive in case
+# generated trees are ever committed (e.g. in a test fixture snapshot).
+B/lang/**/*.c linguist-generated=true
+B/lang/**/*.h linguist-generated=true
+tests/projects/*/lang/**/*.c linguist-generated=true
+tests/projects/*/lang/**/*.h linguist-generated=true
