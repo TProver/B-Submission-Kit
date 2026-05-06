@@ -8,11 +8,11 @@
 # Language stats only update on the default branch; allow GitHub a few
 # minutes to recompute after pushing.
 
-*.mch linguist-language=B
-*.ref linguist-language=B
-*.imp linguist-language=B
-*.pmm linguist-language=B
-*.sys linguist-language=B
+*.mch linguist-language="B (Formal Method)"
+*.ref linguist-language="B (Formal Method)"
+*.imp linguist-language="B (Formal Method)"
+*.pmm linguist-language="B (Formal Method)"
+*.sys linguist-language="B (Formal Method)"
 
 # C produced by atelierb_generate_c is build output, not authored code.
 # These paths are gitignored today; the rules below are defensive in case
